@@ -34,7 +34,7 @@ def list_students():
     </body>
     </html>
     """
-    # Add Pass/Fail remarks dynamically
+    # Add Pass/Fail remarks
     students_with_remarks = []
     for s in students:
         student_copy = s.copy()
@@ -49,7 +49,6 @@ def add_student_form():
         name = request.form['name']
         grade = int(request.form['grade'])
         section = request.form['section']
-        # Generate a new unique ID
         new_id = max([s['id'] for s in students], default=0) + 1
         new_student = {"id": new_id, "name": name, "grade": grade, "section": section}
         students.append(new_student)
@@ -106,4 +105,3 @@ def edit_student(id):
 
 if __name__ == '__main__':
     app.run(debug=True)
-

@@ -8,8 +8,9 @@ def get_student():
     remarks = "Pass" if grade >= 75 else "Fail"
     
     return jsonify({
-        "name": "Juan",
+        "name": "Chalzy",
         "grade": grade,
         "section": "Zechariah",
         "remarks": remarks
     })
+

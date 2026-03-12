@@ -18,6 +18,9 @@ def home():
 @app.route('/students')
 def list_students():
     html = """
+    <html>
+    <head><title>Student List</title></head>
+    <body>
     <h2>Student List</h2>
     <a href="/add_student_form">Add New Student</a><br><br>
     <ul>
@@ -28,8 +31,10 @@ def list_students():
         </li>
     {% endfor %}
     </ul>
+    </body>
+    </html>
     """
-    # Add Pass/Fail remarks
+    # Add Pass/Fail remarks dynamically
     students_with_remarks = []
     for s in students:
         student_copy = s.copy()
@@ -44,12 +49,16 @@ def add_student_form():
         name = request.form['name']
         grade = int(request.form['grade'])
         section = request.form['section']
-        new_id = len(students) + 1
+        # Generate a new unique ID
+        new_id = max([s['id'] for s in students], default=0) + 1
         new_student = {"id": new_id, "name": name, "grade": grade, "section": section}
         students.append(new_student)
         return redirect(url_for('list_students'))
 
     html = """
+    <html>
+    <head><title>Add Student</title></head>
+    <body>
     <h2>Add New Student</h2>
     <form method="POST">
         Name: <input type="text" name="name" autofocus required><br><br>
@@ -59,6 +68,8 @@ def add_student_form():
     </form>
     <br>
     <a href="/students">Back to List</a>
+    </body>
+    </html>
     """
     return render_template_string(html)
 
@@ -76,6 +87,9 @@ def edit_student(id):
         return redirect(url_for('list_students'))
 
     html = """
+    <html>
+    <head><title>Edit Student</title></head>
+    <body>
     <h2>Edit Student</h2>
     <form method="POST">
         Name: <input type="text" name="name" value="{{student.name}}" required><br><br>
@@ -85,6 +99,8 @@ def edit_student(id):
     </form>
     <br>
     <a href="/students">Back to List</a>
+    </body>
+    </html>
     """
     return render_template_string(html, student=student)
 

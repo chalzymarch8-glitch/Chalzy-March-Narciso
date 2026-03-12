@@ -1,16 +1,14 @@
-# --- VIEW SINGLE STUDENT WITH PASS/FAIL ---
+from flask import Flask, jsonify, request
+app = Flask(__name__)
+
+@app.route('/')
+def home():
+return " Student API!"
+
 @app.route('/student')
 def get_student():
-    # Get grade from query parameter (default = 0)
-    grade = int(request.args.get('grade', 0))
-    
-    # Determine pass or fail
-    remarks = "Pass" if grade >= 75 else "Fail"
-    
-    return jsonify({
-        "name": "Chalzy",
-        "grade": grade,
-        "section": "Zechariah",
-        "remarks": remarks
-    })
-
+return jsonify({
+"name": "Chalzy",
+"grade": 10,
+"section": "Firebase"
+})

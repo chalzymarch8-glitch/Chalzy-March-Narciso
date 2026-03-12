@@ -1,8 +1,8 @@
-from flask import Flask, jsonify, request, render_template_string, redirect, url_for
+from flask import Flask, request, render_template_string, redirect, url_for, jsonify
 
 app = Flask(__name__)
 
-# In-memory student data
+# Sample in-memory student data
 students = [
     {"id": 1, "name": "Juan", "grade": 85, "section": "Zechariah"},
     {"id": 2, "name": "Maria", "grade": 90, "section": "Zechariah"},
@@ -14,7 +14,7 @@ students = [
 def home():
     return redirect(url_for('list_students'))
 
-# --- READ ALL STUDENTS ---
+# --- VIEW ALL STUDENTS ---
 @app.route('/students')
 def list_students():
     students_with_remarks = []
@@ -34,8 +34,9 @@ def list_students():
         {% for s in students %}
             <li>
                 ID: {{s.id}} - {{s.name}} (Grade: {{s.grade}}, Section: {{s.section}}, Remarks: {{s.remarks}})
-                [<a href="/edit_student/{{s.id}}">Edit</a>]
-                [<a href="/delete_student/{{s.id}}" onclick="return confirm('Are you sure?')">Delete</a>]
+                [<a href="/student/{{s.id}}">View</a>]
+                [<a href="/student/{{s.id}}/edit">Edit</a>]
+                [<a href="/student/{{s.id}}/delete" onclick="return confirm('Are you sure?')">Delete</a>]
             </li>
         {% endfor %}
         </ul>
@@ -44,17 +45,35 @@ def list_students():
     """
     return render_template_string(html, students=students_with_remarks)
 
-# --- READ SINGLE STUDENT (JSON API) ---
-@app.route('/students/<int:id>')
-def get_student(id):
+# --- VIEW SINGLE STUDENT ---
+@app.route('/student/<int:id>')
+def view_student(id):
     student = next((s for s in students if s['id'] == id), None)
     if not student:
-        return jsonify({"error": "Student not found"}), 404
+        return "Student not found", 404
     student_copy = student.copy()
     student_copy['remarks'] = "Pass" if student['grade'] >= 75 else "Fail"
-    return jsonify(student_copy)
 
-# --- CREATE STUDENT ---
+    html = """
+    <!DOCTYPE html>
+    <html>
+    <head><title>View Student</title></head>
+    <body>
+        <h2>Student Details</h2>
+        <p>ID: {{student.id}}</p>
+        <p>Name: {{student.name}}</p>
+        <p>Grade: {{student.grade}}</p>
+        <p>Section: {{student.section}}</p>
+        <p>Remarks: {{student.remarks}}</p>
+        <a href="/student/{{student.id}}/edit">Edit</a> |
+        <a href="/student/{{student.id}}/delete" onclick="return confirm('Are you sure?')">Delete</a> |
+        <a href="/students">Back to List</a>
+    </body>
+    </html>
+    """
+    return render_template_string(html, student=student_copy)
+
+# --- ADD STUDENT FORM ---
 @app.route('/add_student_form', methods=['GET', 'POST'])
 def add_student_form():
     if request.method == 'POST':
@@ -85,8 +104,8 @@ def add_student_form():
     """
     return render_template_string(html)
 
-# --- UPDATE STUDENT ---
-@app.route('/edit_student/<int:id>', methods=['GET', 'POST'])
+# --- EDIT STUDENT ---
+@app.route('/student/<int:id>/edit', methods=['GET', 'POST'])
 def edit_student(id):
     student = next((s for s in students if s['id'] == id), None)
     if not student:
@@ -96,7 +115,7 @@ def edit_student(id):
         student['name'] = request.form['name']
         student['grade'] = int(request.form['grade'])
         student['section'] = request.form['section']
-        return redirect(url_for('list_students'))
+        return redirect(url_for('view_student', id=id))
 
     html = """
     <!DOCTYPE html>
@@ -111,14 +130,14 @@ def edit_student(id):
             <button type="submit">Update</button>
         </form>
         <br>
-        <a href="/students">Back to List</a>
+        <a href="/student/{{student.id}}">Back to Details</a>
     </body>
     </html>
     """
     return render_template_string(html, student=student)
 
 # --- DELETE STUDENT ---
-@app.route('/delete_student/<int:id>')
+@app.route('/student/<int:id>/delete')
 def delete_student(id):
     global students
     students = [s for s in students if s['id'] != id]
